@@ -8,11 +8,12 @@
 int nirtconfig_find(int argc, char** argv);
 int nirtconfig_getimage(int argc, char** argv);
 void nirtconfig_printSystemInfo(NISysCfgSessionHandle session);
-int status;
+void nirtconfig_buildOutputDir(NISysCfgSessionHandle session, char* pathBuffer);
 
 //Main
 int main(int argc, char** argv)
 {
+    int status = 0;
     
     if (argc > 1) //Command passed as argument
     {
@@ -122,7 +123,7 @@ int nirtconfig_getimage(int argc, char** argv)
         status = NISysCfgInitializeSession(targetName, NULL, NULL, NISysCfgLocaleDefault, 
                                             NISysCfgBoolFalse, 10000, NULL, &session);
 
-        if (status != 0)
+        if (status != 0) //error opening session
         {
             printf("Unable to Connect to Target\n");
             return status;
@@ -130,12 +131,13 @@ int nirtconfig_getimage(int argc, char** argv)
 
         printf("Getting Image: %s\n", targetName);
 
-        char destination[256];
-        getcwd(destination, sizeof(destination) );
+        char destination[256] = "";
+        nirtconfig_buildOutputDir(session, destination);
+
         printf("Saving To: \"%s\"\n", destination);
 
-        // status = NISysCfgGetSystemImageAsFolder2(session, NISysCfgBoolTrue, destination,
-        //                                  NULL, 0, NULL, NISysCfgBoolTrue, NISysCfgBoolFalse);
+        status = NISysCfgGetSystemImageAsFolder2(session, NISysCfgBoolTrue, destination,
+                                         NULL, 0, NULL, NISysCfgBoolTrue, NISysCfgBoolFalse);
     }
 
     else //no arguments passed
@@ -145,4 +147,15 @@ int nirtconfig_getimage(int argc, char** argv)
     }
 
     return status;
+}
+
+void nirtconfig_buildOutputDir(NISysCfgSessionHandle session, char *pathBuffer)
+{
+    char hostname[NISYSCFG_SIMPLE_STRING_LENGTH] = "";
+
+    getcwd(pathBuffer, 256);
+    NISysCfgGetSystemProperty(session, NISysCfgSystemPropertyHostname, hostname);
+
+    strcat(pathBuffer, "/");
+    strcat(pathBuffer, hostname);
 }
