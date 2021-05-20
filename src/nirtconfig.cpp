@@ -7,6 +7,8 @@
 //Function Declarations
 int nirtconfig_find(int argc, char** argv);
 int nirtconfig_getimage(int argc, char** argv);
+int nirtconfig_findSingleTarget(char *targetName);
+int nirtconfig_findAllTargets();
 void nirtconfig_printSystemInfo(NISysCfgSessionHandle session);
 void nirtconfig_buildOutputDir(NISysCfgSessionHandle session, char* pathBuffer);
 
@@ -47,10 +49,6 @@ int main(int argc, char** argv)
 
 int nirtconfig_find(int argc, char** argv)
 {
-
-    NISysCfgEnumSystemHandle enumSystemHandle = NULL;
-    NISysCfgSessionHandle session = NULL;
-    char systemName[NISYSCFG_SIMPLE_STRING_LENGTH] = "";
     int status = 0;
 
     if (argc > 2) //IP address passed as argument, find specific target
@@ -58,39 +56,62 @@ int nirtconfig_find(int argc, char** argv)
         char targetName[] = "";
         strcpy(targetName, argv[2]);
 
-        status = NISysCfgInitializeSession(targetName, NULL, NULL, NISysCfgLocaleDefault, 
-                                            NISysCfgBoolFalse, 10000, NULL, &session);
+        status = nirtconfig_findSingleTarget(targetName);
 
-        if (status != 0)
-        {
-            printf("Target Not Found\n");
-            return status;
-        }
-        
-        printf("%-25s%-20s%-15s%s\n", "HOSTNAME", "IP ADDR", "MODEL", "SERIAL NUMBER");
-        nirtconfig_printSystemInfo(session);
-
-        status = NISysCfgCloseHandle(session);
         return status;
     }
 
     else //no arguments passed, find all available targets
     {
-        status = NISysCfgFindSystems(NULL, NULL, NISysCfgBoolTrue, 
+        status = nirtconfig_findAllTargets();
+    }    
+
+    return status;
+}
+
+int nirtconfig_findSingleTarget(char *targetName)
+{
+    int status = 0;
+    NISysCfgSessionHandle session = NULL;
+
+    status = NISysCfgInitializeSession(targetName, NULL, NULL, NISysCfgLocaleDefault, 
+                                        NISysCfgBoolFalse, 10000, NULL, &session);
+
+    if (status != 0)
+    {
+        printf("Target Not Found\n");
+        return status;
+    }
+    
+    printf("%-25s%-20s%-15s%s\n", "HOSTNAME", "IP ADDR", "MODEL", "SERIAL NUMBER");
+    nirtconfig_printSystemInfo(session);
+
+    status = NISysCfgCloseHandle(session);
+
+    return status;
+}
+
+int nirtconfig_findAllTargets()
+{
+    NISysCfgEnumSystemHandle enumSystemHandle = NULL;
+    NISysCfgSessionHandle session = NULL;
+    char systemName[NISYSCFG_SIMPLE_STRING_LENGTH] = "";
+    int status = 0;
+
+    status = NISysCfgFindSystems(NULL, NULL, NISysCfgBoolTrue, 
                             NISysCfgIncludeCachedResultsNone, NISysCfgSystemNameFormatHostname,
                             10000,NISysCfgBoolTrue,&enumSystemHandle);
 
-        printf("%-25s%-20s%-15s%s\n", "HOSTNAME", "IP ADDR", "MODEL", "SERIAL NUMBER");
+    printf("%-25s%-20s%-15s%s\n", "HOSTNAME", "IP ADDR", "MODEL", "SERIAL NUMBER");
 
-        while(status = NISysCfgNextSystemInfo(enumSystemHandle, systemName) == 0)
-        {
-            NISysCfgInitializeSession(systemName, NULL, NULL, NISysCfgLocaleDefault, 
-                                            NISysCfgBoolFalse, 10000, NULL, &session);
+    while(status = NISysCfgNextSystemInfo(enumSystemHandle, systemName) == 0)
+    {
+        NISysCfgInitializeSession(systemName, NULL, NULL, NISysCfgLocaleDefault, 
+                                        NISysCfgBoolFalse, 10000, NULL, &session);
 
-            nirtconfig_printSystemInfo(session);
-            status = NISysCfgCloseHandle(session);
-        }
-    }    
+        nirtconfig_printSystemInfo(session);
+        status = NISysCfgCloseHandle(session);
+    }
 
     return status;
 }
