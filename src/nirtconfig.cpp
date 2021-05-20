@@ -6,7 +6,8 @@
 
 //Function Declarations
 int nirtconfig_find(int argc, char** argv);
-int nirtconfig_getimage(int argc, char** argv);
+int nirtconfig_getImage(int argc, char** argv);
+int nirtconfig_setImage(int argc, char** argv);
 int nirtconfig_findSingleTarget(char *targetName);
 int nirtconfig_findAllTargets();
 void nirtconfig_printSystemInfo(NISysCfgSessionHandle session);
@@ -28,7 +29,12 @@ int main(int argc, char** argv)
 
         else if (command == "getimage")
         {
-            status = nirtconfig_getimage(argc, argv);
+            status = nirtconfig_getImage(argc, argv);
+        }
+
+        else if (command == "setimage")
+        {
+            status = nirtconfig_setImage(argc, argv);
         }
 
         else
@@ -131,7 +137,7 @@ void nirtconfig_printSystemInfo(NISysCfgSessionHandle session)
     printf("%-25s%-20s%-15s%s\n", hostname, ipaddr, model, serialNumber);
 }
 
-int nirtconfig_getimage(int argc, char** argv)
+int nirtconfig_getImage(int argc, char** argv)
 {
     int status = 0;
 
@@ -179,4 +185,10 @@ void nirtconfig_buildOutputDir(NISysCfgSessionHandle session, char *pathBuffer)
 
     strcat(pathBuffer, "/");
     strcat(pathBuffer, hostname);
+}
+
+int nirtconfig_setImage(int argc, char **argv)
+{
+    printf("Setting Image\n");
+    return 0;
 }
