@@ -13,7 +13,6 @@ int nirtconfig_findAllTargets();
 void nirtconfig_printSystemInfo(NISysCfgSessionHandle session);
 void nirtconfig_buildOutputDir(NISysCfgSessionHandle session, char* pathBuffer);
 
-//Main
 int main(int argc, char** argv)
 {
     int status = 0;
@@ -43,6 +42,7 @@ int main(int argc, char** argv)
             status = 1;
         }
     }
+
     else
     {
         printf("No Function Passed\n");
@@ -110,7 +110,7 @@ int nirtconfig_findAllTargets()
 
     printf("%-25s%-20s%-15s%s\n", "HOSTNAME", "IP ADDR", "MODEL", "SERIAL NUMBER");
 
-    while(status = NISysCfgNextSystemInfo(enumSystemHandle, systemName) == 0)
+    while(status = NISysCfgNextSystemInfo(enumSystemHandle, systemName) == NISysCfg_OK)
     {
         NISysCfgInitializeSession(systemName, NULL, NULL, NISysCfgLocaleDefault, 
                                         NISysCfgBoolFalse, 10000, NULL, &session);
@@ -118,6 +118,8 @@ int nirtconfig_findAllTargets()
         nirtconfig_printSystemInfo(session);
         status = NISysCfgCloseHandle(session);
     }
+
+    status = NISysCfgCloseHandle(enumSystemHandle);
 
     return status;
 }
@@ -144,7 +146,7 @@ int nirtconfig_getImage(int argc, char** argv)
     if (argc > 2) //argument passed
     {
         NISysCfgSessionHandle session = NULL;
-        char targetName[] = "";
+        char targetName[256] = "";
         strcpy(targetName, argv[2]);
 
         status = NISysCfgInitializeSession(targetName, NULL, NULL, NISysCfgLocaleDefault, 
@@ -189,6 +191,33 @@ void nirtconfig_buildOutputDir(NISysCfgSessionHandle session, char *pathBuffer)
 
 int nirtconfig_setImage(int argc, char **argv)
 {
-    printf("Setting Image\n");
-    return 0;
+    if (argc != 4)
+    {
+        printf("Error Expecting Arguments: setimage <TARGETNAME> <IMAGEPATH>\n");
+        return 0;
+    }
+
+    int status = 0;
+    NISysCfgSessionHandle session = NULL;
+    char targetName[256] = "";
+    strcpy(targetName, argv[2]);
+    char imagePath[256] = "";
+    strcpy(imagePath, argv[3]);
+
+    status = NISysCfgInitializeSession(targetName, NULL, NULL, NISysCfgLocaleDefault, 
+                                        NISysCfgBoolFalse, 10000, NULL, &session);
+
+    if (status != 0) //error opening session
+    {
+        printf("Unable to Connect to Target: %s\n", targetName);
+        return status;
+    }
+
+    printf("Imaging Target: %s\nImage Used: %s\n", targetName, imagePath);
+
+    status = NISysCfgSetSystemImageFromFolder2(session, NISysCfgBoolTrue, imagePath, "", 0, NULL, 
+                                            NISysCfgBoolFalse, NISysCfgPreservePrimaryResetOthers);
+    
+    status = NISysCfgCloseHandle(session);
+    return status;
 }
