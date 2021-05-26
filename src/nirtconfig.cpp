@@ -244,8 +244,12 @@ int nirtconfig_selfTest(int argc, char** argv)
 
     NISysCfgEnumResourceHandle resourceHandle = NULL;
     NISysCfgResourceHandle resource = NULL;
+    NISysCfgFilterHandle filter = NULL;
 
-    NISysCfgFindHardware(session, NISysCfgFilterModeMatchValuesAll, NULL, NULL, &resourceHandle);
+    NISysCfgCreateFilter(session, &filter);
+    NISysCfgSetFilterProperty(filter, NISysCfgFilterPropertyExpertName, "network");
+
+    NISysCfgFindHardware(session, NISysCfgFilterModeMatchValuesNone, filter, NULL, &resourceHandle);
 
     printf("%-50s%-20s%-15s%s\n", "RESOURCE NAME", "PRODUCT NAME", "PASS/FAIL", "DETAILED RESULTS");
     while (status = NISysCfgNextResource(session, resourceHandle, &resource) == NISysCfg_OK) //Iterate through all hardware resources
