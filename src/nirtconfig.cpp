@@ -14,6 +14,7 @@ static const struct
     {"find", nirtconfig_find},
     {"setimage", nirtconfig_setImage},
     {"getimage", nirtconfig_getImage},
+    {"selftest", nirtconfig_selfTest},
     {NULL, NULL}
 };
 
@@ -217,4 +218,79 @@ int nirtconfig_setImage(int argc, char **argv)
     
     status = NISysCfgCloseHandle(session);
     return status;
+}
+
+int nirtconfig_selfTest(int argc, char** argv)
+{
+    if (argc != 3) //Check for correct number of incoming arguments
+    {
+        printf("Error Expecting Arguments: selftest <TARGETNAME>");
+        return 0;
+    }
+
+    NISysCfgSessionHandle session = NULL;
+    int status = 0;
+    char targetName[NISYSCFG_SIMPLE_STRING_LENGTH] = "";
+    strcpy(targetName, argv[2]);
+
+    status = NISysCfgInitializeSession(targetName, NULL, NULL, NISysCfgLocaleDefault, 
+                                        NISysCfgBoolFalse, 10000, NULL, &session);
+
+    if (status != 0) //error opening session
+    {
+        printf("Unable to Connect to Target: %s\n", targetName);
+        return status;
+    }
+
+    NISysCfgEnumResourceHandle resourceHandle = NULL;
+    NISysCfgResourceHandle resource = NULL;
+
+    NISysCfgFindHardware(session, NISysCfgFilterModeMatchValuesAll, NULL, NULL, &resourceHandle);
+
+    printf("%-50s%-20s%-15s%s\n", "RESOURCE NAME", "PRODUCT NAME", "PASS/FAIL", "DETAILED RESULTS");
+    while (status = NISysCfgNextResource(session, resourceHandle, &resource) == NISysCfg_OK) //Iterate through all hardware resources
+    {
+        nirtconfig_printSelfTestResults(resource);
+        NISysCfgCloseHandle(resource);
+    }
+
+    status = NISysCfgCloseHandle(resourceHandle);
+    status = NISysCfgCloseHandle(session);
+
+    return status;
+}
+
+void nirtconfig_printSelfTestResults(NISysCfgResourceHandle resource)
+{
+    char productName[NISYSCFG_SIMPLE_STRING_LENGTH] = "";
+    char resourceName [NISYSCFG_SIMPLE_STRING_LENGTH] = "";
+    char alias [NISYSCFG_SIMPLE_STRING_LENGTH] = "";
+    char passFail [NISYSCFG_SIMPLE_STRING_LENGTH] = "";
+    char* detailedResults = NULL;
+    int status = 0;
+
+    NISysCfgGetResourceProperty(resource, NISysCfgResourcePropertyProductName, productName);
+    NISysCfgGetResourceIndexedProperty(resource, NISysCfgIndexedPropertyExpertResourceName, 0, resourceName);
+    NISysCfgGetResourceIndexedProperty(resource, NISysCfgIndexedPropertyExpertUserAlias, 0, alias);
+
+    status = NISysCfgSelfTestHardware(resource, 0, &detailedResults);
+
+    switch (status) //populate pass/fail string
+    {
+        case NISysCfg_OK:
+            strcpy(passFail, "Pass");
+            break;
+        case NISysCfg_NotImplemented:
+            strcpy(passFail, "Not Supported");
+            break;
+        default:
+            sprintf(passFail, "Error: %d", status);
+    }
+
+    //print results using resource's alias if available
+    if (strlen(alias)) printf("%-50s%-20s%-15s%s\n", alias, productName, passFail, detailedResults);
+    else printf("%-50s%-20s%-15s%s\n", resourceName, productName, passFail, detailedResults);
+
+    NISysCfgFreeDetailedString(detailedResults);
+
 }
