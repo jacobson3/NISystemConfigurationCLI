@@ -3,15 +3,7 @@
 #include <string>
 #include <unistd.h>
 #include <nisyscfg/nisyscfg.h>
-
-//Function Declarations
-int nirtconfig_find(int argc, char** argv);
-int nirtconfig_getImage(int argc, char** argv);
-int nirtconfig_setImage(int argc, char** argv);
-int nirtconfig_findSingleTarget(char *targetName);
-int nirtconfig_findAllTargets();
-void nirtconfig_printSystemInfo(NISysCfgSessionHandle session);
-void nirtconfig_buildOutputDir(NISysCfgSessionHandle session, char* pathBuffer);
+#include "nirtconfig.h"
 
 static const struct
 {
