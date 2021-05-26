@@ -13,37 +13,42 @@ int nirtconfig_findAllTargets();
 void nirtconfig_printSystemInfo(NISysCfgSessionHandle session);
 void nirtconfig_buildOutputDir(NISysCfgSessionHandle session, char* pathBuffer);
 
+static const struct
+{
+    const char* const name;
+    int (*fpointer)(int argc, char** argv);
+} nirtFunctions[] =
+{
+    {"find", nirtconfig_find},
+    {"setimage", nirtconfig_setImage},
+    {"getimage", nirtconfig_getImage},
+    {NULL, NULL}
+};
+
+
 int main(int argc, char** argv)
 {
     int status = 0;
-    
+
     if (argc > 1) //Command passed as argument
     {
         std::string command = argv[1];
+        int i = 0;
 
-        if (command == "find")
+        while (nirtFunctions[i].name != NULL) //Iterate through function lookup table
         {
-            status = nirtconfig_find(argc, argv);
+            if (nirtFunctions[i].name == command) //Check if command matches function in table
+            {
+                status = (*nirtFunctions[i].fpointer)(argc, argv);
+                break;
+            }
+            i++;
         }
 
-        else if (command == "getimage")
-        {
-            status = nirtconfig_getImage(argc, argv);
-        }
-
-        else if (command == "setimage")
-        {
-            status = nirtconfig_setImage(argc, argv);
-        }
-
-        else
-        {
-            printf("No function: %s\n", argv[1]);
-            status = 1;
-        }
+        if (nirtFunctions[i].name == NULL) printf("Invalid Command: %s\n", argv[1]);
     }
 
-    else
+    else //No arguments passed
     {
         printf("No Function Passed\n");
         status = 1;
@@ -83,7 +88,7 @@ int nirtconfig_findSingleTarget(char *targetName)
     status = NISysCfgInitializeSession(targetName, NULL, NULL, NISysCfgLocaleDefault, 
                                         NISysCfgBoolFalse, 10000, NULL, &session);
 
-    if (status != 0)
+    if (status != 0) //Error initializeing session
     {
         printf("Target Not Found\n");
         return status;
@@ -110,7 +115,7 @@ int nirtconfig_findAllTargets()
 
     printf("%-25s%-20s%-15s%s\n", "HOSTNAME", "IP ADDR", "MODEL", "SERIAL NUMBER");
 
-    while(status = NISysCfgNextSystemInfo(enumSystemHandle, systemName) == NISysCfg_OK)
+    while(status = NISysCfgNextSystemInfo(enumSystemHandle, systemName) == NISysCfg_OK) //Iterate through systems found
     {
         NISysCfgInitializeSession(systemName, NULL, NULL, NISysCfgLocaleDefault, 
                                         NISysCfgBoolFalse, 10000, NULL, &session);
@@ -191,7 +196,7 @@ void nirtconfig_buildOutputDir(NISysCfgSessionHandle session, char *pathBuffer)
 
 int nirtconfig_setImage(int argc, char **argv)
 {
-    if (argc != 4)
+    if (argc != 4) //Check for correct number of arguments
     {
         printf("Error Expecting Arguments: setimage <TARGETNAME> <IMAGEPATH>\n");
         return 0;
