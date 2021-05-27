@@ -15,6 +15,7 @@ static const struct
     {"setimage", nirtconfig_setImage},
     {"getimage", nirtconfig_getImage},
     {"selftest", nirtconfig_selfTest},
+    {"sethostname", nirtconfig_setHostname},
     {NULL, NULL}
 };
 
@@ -57,10 +58,7 @@ int nirtconfig_find(int argc, char** argv)
 
     if (argc > 2) //IP address passed as argument, find specific target
     {
-        char targetName[] = "";
-        strcpy(targetName, argv[2]);
-
-        status = nirtconfig_findSingleTarget(targetName);
+        status = nirtconfig_findSingleTarget(argv[2]);
 
         return status;
     }
@@ -144,10 +142,8 @@ int nirtconfig_getImage(int argc, char** argv)
     if (argc > 2) //argument passed
     {
         NISysCfgSessionHandle session = NULL;
-        char targetName[256] = "";
-        strcpy(targetName, argv[2]);
 
-        status = NISysCfgInitializeSession(targetName, NULL, NULL, NISysCfgLocaleDefault, 
+        status = NISysCfgInitializeSession(argv[2], NULL, NULL, NISysCfgLocaleDefault, 
                                             NISysCfgBoolFalse, 10000, NULL, &session);
 
         if (status != 0) //error opening session
@@ -156,7 +152,7 @@ int nirtconfig_getImage(int argc, char** argv)
             return status;
         }
 
-        printf("Getting Image: %s\n", targetName);
+        printf("Getting Image: %s\n", argv[2]);
 
         char destination[256] = "";
         nirtconfig_buildOutputDir(session, destination);
@@ -197,23 +193,19 @@ int nirtconfig_setImage(int argc, char **argv)
 
     int status = 0;
     NISysCfgSessionHandle session = NULL;
-    char targetName[256] = "";
-    strcpy(targetName, argv[2]);
-    char imagePath[256] = "";
-    strcpy(imagePath, argv[3]);
 
-    status = NISysCfgInitializeSession(targetName, NULL, NULL, NISysCfgLocaleDefault, 
+    status = NISysCfgInitializeSession(argv[2], NULL, NULL, NISysCfgLocaleDefault, 
                                         NISysCfgBoolFalse, 10000, NULL, &session);
 
     if (status != 0) //error opening session
     {
-        printf("Unable to Connect to Target: %s\n", targetName);
+        printf("Unable to Connect to Target: %s\n", argv[2]);
         return status;
     }
 
-    printf("Imaging Target: %s\nImage Used: %s\n", targetName, imagePath);
+    printf("Imaging Target: %s\nImage Used: %s\n", argv[2], argv[3]);
 
-    status = NISysCfgSetSystemImageFromFolder2(session, NISysCfgBoolTrue, imagePath, "", 0, NULL, 
+    status = NISysCfgSetSystemImageFromFolder2(session, NISysCfgBoolTrue, argv[3], "", 0, NULL, 
                                             NISysCfgBoolFalse, NISysCfgPreservePrimaryResetOthers);
     
     status = NISysCfgCloseHandle(session);
@@ -230,15 +222,13 @@ int nirtconfig_selfTest(int argc, char** argv)
 
     NISysCfgSessionHandle session = NULL;
     int status = 0;
-    char targetName[NISYSCFG_SIMPLE_STRING_LENGTH] = "";
-    strcpy(targetName, argv[2]);
 
-    status = NISysCfgInitializeSession(targetName, NULL, NULL, NISysCfgLocaleDefault, 
+    status = NISysCfgInitializeSession(argv[2], NULL, NULL, NISysCfgLocaleDefault, 
                                         NISysCfgBoolFalse, 10000, NULL, &session);
 
     if (status != 0) //error opening session
     {
-        printf("Unable to Connect to Target: %s\n", targetName);
+        printf("Unable to Connect to Target: %s\n", argv[2]);
         return status;
     }
 
@@ -251,7 +241,7 @@ int nirtconfig_selfTest(int argc, char** argv)
 
     NISysCfgFindHardware(session, NISysCfgFilterModeMatchValuesNone, filter, NULL, &resourceHandle);
 
-    printf("%-50s%-20s%-15s%s\n", "RESOURCE NAME", "PRODUCT NAME", "PASS/FAIL", "DETAILED RESULTS");
+    printf("%-40s%-20s%-15s%s\n", "RESOURCE NAME", "PRODUCT NAME", "PASS/FAIL", "DETAILED RESULTS");
     while (status = NISysCfgNextResource(session, resourceHandle, &resource) == NISysCfg_OK) //Iterate through all hardware resources
     {
         nirtconfig_printSelfTestResults(resource);
@@ -292,9 +282,37 @@ void nirtconfig_printSelfTestResults(NISysCfgResourceHandle resource)
     }
 
     //print results using resource's alias if available
-    if (strlen(alias)) printf("%-50s%-20s%-15s%s\n", alias, productName, passFail, detailedResults);
-    else printf("%-50s%-20s%-15s%s\n", resourceName, productName, passFail, detailedResults);
+    if (strlen(alias)) printf("%-40s%-20s%-15s%s\n", alias, productName, passFail, detailedResults);
+    else printf("%-40s%-20s%-15s%s\n", resourceName, productName, passFail, detailedResults);
 
     NISysCfgFreeDetailedString(detailedResults);
 
+}
+
+int nirtconfig_setHostname(int argc, char** argv)
+{
+    if (argc != 4) //Check for correct number of incoming arguments
+    {
+        printf("Error Expecting Arguments: sethostname <TARGETNAME> <NEW_TARGETNAME>");
+        return 0;
+    }
+
+    NISysCfgSessionHandle session = NULL;
+    int status = 0;
+
+    status = NISysCfgInitializeSession(argv[2], NULL, NULL, NISysCfgLocaleDefault, 
+                                        NISysCfgBoolFalse, 10000, NULL, &session);
+
+    if (status != 0) //error opening session
+    {
+        printf("Unable to Connect to Target: %s\n", argv[2]);
+        return status;
+    }
+
+    printf("Updating Hostname of %s to %s\n", argv[2], argv[3]);
+
+    status = NISysCfgSetSystemProperty(session, NISysCfgSystemPropertyHostname, argv[3]);
+    NISysCfgCloseHandle(session);
+
+    return status;
 }

@@ -7,6 +7,7 @@ int nirtconfig_find(int argc, char** argv);
 int nirtconfig_getImage(int argc, char** argv);
 int nirtconfig_setImage(int argc, char** argv);
 int nirtconfig_selfTest(int argc, char** argv);
+int nirtconfig_setHostname(int argc, char** argv);
 
 //Subroutines
 int nirtconfig_findSingleTarget(char *targetName);
