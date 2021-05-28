@@ -101,6 +101,8 @@ int nirtconfig_findAllTargets()
     NISysCfgSessionHandle session = NULL;
     char systemName[NISYSCFG_SIMPLE_STRING_LENGTH] = "";
     int status = 0;
+    
+    printf("Finding Available Targets...\n");
 
     status = NISysCfgFindSystems(NULL, NULL, NISysCfgBoolTrue, 
                             NISysCfgIncludeCachedResultsNone, NISysCfgSystemNameFormatHostname,
@@ -238,6 +240,8 @@ int nirtconfig_selfTest(int argc, char** argv)
     NISysCfgResourceHandle resource = NULL;
     NISysCfgFilterHandle filter = NULL;
 
+    printf("Running Self Tests...\n");
+    
     NISysCfgCreateFilter(session, &filter);
     NISysCfgSetFilterProperty(filter, NISysCfgFilterPropertyExpertName, "network");
 
