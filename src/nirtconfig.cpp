@@ -319,7 +319,7 @@ int nirtconfig_setHostname(int argc, char** argv)
 
     NISysCfgSaveSystemChanges(session, &restartRequired, &detailedResults);
     NISysCfgFreeDetailedString(detailedResults);
-    
+
     NISysCfgCloseHandle(session);
 
     return status;
@@ -348,7 +348,7 @@ int nirtconfig_restartTarget(int argc, char** argv)
     char ipAddr[NISYSCFG_SIMPLE_STRING_LENGTH] = "";
 
     printf("Restarting...\n");
-    status = NISysCfgRestart(session, NISysCfgBoolTrue, NISysCfgBoolFalse, NISysCfgBoolFalse, 60000, ipAddr);
+    status = NISysCfgRestart(session, NISysCfgBoolTrue, NISysCfgBoolFalse, NISysCfgBoolFalse, 120000, ipAddr);
     if (status == 0) printf("Restarted With IP Address: %s\n", ipAddr);
     NISysCfgCloseHandle(session);
 
