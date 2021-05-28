@@ -301,7 +301,7 @@ int nirtconfig_setHostname(int argc, char** argv)
     NISysCfgSessionHandle session = NULL;
     int status = 0;
 
-    status = NISysCfgInitializeSession(argv[2], NULL, NULL, NISysCfgLocaleDefault, 
+    status = NISysCfgInitializeSession(argv[2], "admin", "", NISysCfgLocaleDefault, 
                                         NISysCfgBoolFalse, 10000, NULL, &session);
 
     if (status != 0) //error opening session
@@ -313,6 +313,13 @@ int nirtconfig_setHostname(int argc, char** argv)
     printf("Updating Hostname of %s to %s\n", argv[2], argv[3]);
 
     status = NISysCfgSetSystemProperty(session, NISysCfgSystemPropertyHostname, argv[3]);
+
+    NISysCfgBool restartRequired;
+    char* detailedResults = NULL;
+
+    NISysCfgSaveSystemChanges(session, &restartRequired, &detailedResults);
+    NISysCfgFreeDetailedString(detailedResults);
+    
     NISysCfgCloseHandle(session);
 
     return status;
