@@ -16,6 +16,7 @@ static const struct
     {"getimage", nirtconfig_getImage},
     {"selftest", nirtconfig_selfTest},
     {"sethostname", nirtconfig_setHostname},
+    {"setip", nirtconfig_setIpAddress},
     {"restart", nirtconfig_restartTarget},
     {NULL, NULL}
 };
@@ -318,8 +319,44 @@ int nirtconfig_setHostname(int argc, char** argv)
     char* detailedResults = NULL;
 
     NISysCfgSaveSystemChanges(session, &restartRequired, &detailedResults);
+ 
     NISysCfgFreeDetailedString(detailedResults);
+    NISysCfgCloseHandle(session);
 
+    return status;
+}
+
+int nirtconfig_setIpAddress(int argc, char** argv)
+{
+    if (argc != 4) //Check for correct number of incoming arguments
+    {
+        printf("Error Expecting Arguments: sethostname <TARGETNAME> <NEW_IP>\n");
+        return 0;
+    }
+
+    NISysCfgSessionHandle session = NULL;
+    int status = 0;
+
+    status = NISysCfgInitializeSession(argv[2], "admin", "", NISysCfgLocaleDefault, 
+                                        NISysCfgBoolFalse, 10000, NULL, &session);
+
+    if (status != 0) //error opening session
+    {
+        printf("Unable to Connect to Target: %s\n", argv[2]);
+        return status;
+    }
+
+    printf("Updating IP Address of %s to %s\n", argv[2], argv[3]);
+
+    status = NISysCfgSetSystemProperty(session, NISysCfgSystemPropertyIpAddress, argv[3]);
+    status = NISysCfgSetSystemProperty(session, NISysCfgSystemPropertyIpAddressMode, NISysCfgIpAddressModeStatic);
+
+    NISysCfgBool restartRequired;
+    char* detailedResults = NULL;
+
+    status = NISysCfgSaveSystemChanges(session, &restartRequired, &detailedResults);
+    
+    NISysCfgFreeDetailedString(detailedResults);
     NISysCfgCloseHandle(session);
 
     return status;

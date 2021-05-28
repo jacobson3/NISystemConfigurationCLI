@@ -8,6 +8,7 @@ int nirtconfig_getImage(int argc, char** argv);
 int nirtconfig_setImage(int argc, char** argv);
 int nirtconfig_selfTest(int argc, char** argv);
 int nirtconfig_setHostname(int argc, char** argv);
+int nirtconfig_setIpAddress(int argc, char** argv);
 int nirtconfig_restartTarget(int argc, char** argv);
 
 //Subroutines
