@@ -10,6 +10,7 @@ int nirtconfig_selfTest(int argc, char** argv);
 int nirtconfig_setHostname(int argc, char** argv);
 int nirtconfig_setIpAddress(int argc, char** argv);
 int nirtconfig_restartTarget(int argc, char** argv);
+int nirtconfig_updateFirmware(int argc, char** argv);
 
 //Subroutines
 int nirtconfig_findSingleTarget(char *targetName);

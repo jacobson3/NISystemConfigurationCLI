@@ -18,6 +18,7 @@ static const struct
     {"sethostname", nirtconfig_setHostname},
     {"setip", nirtconfig_setIpAddress},
     {"restart", nirtconfig_restartTarget},
+    {"updatefirmware", nirtconfig_updateFirmware},
     {NULL, NULL}
 };
 
@@ -391,6 +392,65 @@ int nirtconfig_restartTarget(int argc, char** argv)
     printf("Restarting...\n");
     status = NISysCfgRestart(session, NISysCfgBoolTrue, NISysCfgBoolFalse, NISysCfgBoolFalse, 120000, ipAddr);
     if (status == 0) printf("Restarted With IP Address: %s\n", ipAddr);
+    NISysCfgCloseHandle(session);
+
+    return status;
+}
+
+int nirtconfig_updateFirmware(int argc, char** argv)
+{
+    if (argc != 4) //Check for correct number of incoming arguments
+    {
+        printf("Error Expecting Arguments: updatefirmware <TARGETNAME> <FIRMWARE_PATH>\n");
+        return 0;
+    }
+
+    NISysCfgSessionHandle session = NULL;
+    int status = 0;
+
+    status = NISysCfgInitializeSession(argv[2], "admin", "", NISysCfgLocaleDefault, 
+                                        NISysCfgBoolFalse, 10000, NULL, &session);
+
+    if (status != 0) //error opening session
+    {
+        printf("Unable to Connect to Target: %s\n", argv[2]);
+        return status;
+    }
+
+    NISysCfgEnumResourceHandle resourceHandle = NULL;
+    NISysCfgResourceHandle resource = NULL;
+    NISysCfgFilterHandle filter = NULL;
+ 
+    NISysCfgCreateFilter(session, &filter);
+    NISysCfgSetFilterProperty(filter, NISysCfgFilterPropertySupportsFirmwareUpdate, NISysCfgBoolTrue);
+    NISysCfgSetFilterProperty(filter, NISysCfgFilterPropertyResourceName, "system");
+
+    NISysCfgFindHardware(session, NISysCfgFilterModeMatchValuesAll, filter, NULL, &resourceHandle);
+
+    NISysCfgFirmwareStatus firmwareStatus;
+    char* detailedResults = NULL;
+    int percentComplete = 0;
+
+    if (status = NISysCfgNextResource(session, resourceHandle, &resource) == NISysCfg_OK) //Get hardware resource
+    {
+        status = NISysCfgUpgradeFirmwareFromFile(resource, argv[3], NISysCfgBoolTrue, NISysCfgBoolTrue, NISysCfgBoolFalse, &firmwareStatus, &detailedResults);
+
+        if (status == NISysCfg_OK) printf("Updating Firmware...\nTarget: %s\nFirmware: %s\n", argv[2], argv[3]);
+        else return status;
+
+        while (firmwareStatus < 0) //While firmware is being updated
+        {
+            NISysCfgCheckFirmwareStatus(resource, &percentComplete, &firmwareStatus, &detailedResults);
+            sleep(1);
+        }
+
+        printf("Firmware Status: %d\nDetailed Results: %s\n", firmwareStatus, detailedResults);
+
+    }
+
+    NISysCfgFreeDetailedString(detailedResults);
+    NISysCfgCloseHandle(resource);
+    NISysCfgCloseHandle(resourceHandle);
     NISysCfgCloseHandle(session);
 
     return status;
