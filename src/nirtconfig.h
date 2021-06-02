@@ -18,3 +18,4 @@ int nirtconfig_findAllTargets();
 void nirtconfig_printSystemInfo(NISysCfgSessionHandle session);
 void nirtconfig_buildOutputDir(NISysCfgSessionHandle session, char* pathBuffer);
 void nirtconfig_printSelfTestResults(NISysCfgResourceHandle resource);
+void nirtconfig_getCredentials(int argc, char** argv, char* username, char* password);

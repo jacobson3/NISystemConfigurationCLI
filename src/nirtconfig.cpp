@@ -455,3 +455,22 @@ int nirtconfig_updateFirmware(int argc, char** argv)
 
     return status;
 }
+
+void nirtconfig_getCredentials(int argc, char** argv, char* username, char* password)
+{
+    int flag;
+
+    while ((flag = getopt(argc, argv, "u:p:")) != -1)
+    {
+        switch (flag)
+        {
+            case 'u':
+                strcpy(username, optarg);
+                break;
+
+            case 'p':
+                strcpy(password, optarg);
+                break;
+        }
+    }
+}
