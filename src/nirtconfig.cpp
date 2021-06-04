@@ -19,6 +19,7 @@ static const struct
     {"setip", nirtconfig_setIpAddress},
     {"restart", nirtconfig_restartTarget},
     {"updatefirmware", nirtconfig_updateFirmware},
+    {"findsn", nirtconfig_ipFromSerialNumber},
     {NULL, NULL}
 };
 
@@ -412,12 +413,12 @@ int nirtconfig_updateFirmware(int argc, char** argv)
 
     nirtconfig_getCredentials(argc, argv, username, password);
 
-    status = NISysCfgInitializeSession(argv[2], username, password, NISysCfgLocaleDefault, 
+    status = NISysCfgInitializeSession(argv[argc-2], username, password, NISysCfgLocaleDefault, 
                                         NISysCfgBoolFalse, 10000, NULL, &session);
 
     if (status != 0) //error opening session
     {
-        printf("Unable to Connect to Target: %s\n", argv[2]);
+        printf("Unable to Connect to Target: %s\n", argv[argc-2]);
         return status;
     }
 
@@ -428,9 +429,9 @@ int nirtconfig_updateFirmware(int argc, char** argv)
 
     if (status = status = nirtconfig_findFirmwareResource(session, &resource) == NISysCfg_OK) //Get hardware resource
     {
-        status = NISysCfgUpgradeFirmwareFromFile(resource, argv[3], NISysCfgBoolTrue, NISysCfgBoolTrue, NISysCfgBoolFalse, &firmwareStatus, &detailedResults);
+        status = NISysCfgUpgradeFirmwareFromFile(resource, argv[argc-1], NISysCfgBoolTrue, NISysCfgBoolTrue, NISysCfgBoolFalse, &firmwareStatus, &detailedResults);
 
-        if (status == NISysCfg_OK) printf("Updating Firmware...\nTarget: %s\nFirmware: %s\n", argv[2], argv[3]);
+        if (status == NISysCfg_OK) printf("Updating Firmware...\nTarget: %s\nFirmware: %s\n", argv[argc-2], argv[argc-1]);
         else return status;
 
         while (firmwareStatus < 0) //While firmware is being updated
@@ -490,4 +491,43 @@ int nirtconfig_findFirmwareResource(NISysCfgSessionHandle session, NISysCfgResou
     NISysCfgCloseHandle(resourceHandle);
     
     return status;
+}
+
+int nirtconfig_ipFromSerialNumber(int argc, char** argv)
+{
+    if (argc < 3) //Check for correct number of incoming arguments
+    {
+        printf("Error Expecting Arguments: findsn <SERIAL_NUMBER> \n");
+        return 0;
+    }
+    NISysCfgEnumSystemHandle enumSystemHandle = NULL;
+    NISysCfgSessionHandle session = NULL;
+    char systemIP[NISYSCFG_SIMPLE_STRING_LENGTH] = "";
+    char serialNumber[NISYSCFG_SIMPLE_STRING_LENGTH] = "";
+    int status = 0;
+    
+    status = NISysCfgFindSystems(NULL, NULL, NISysCfgBoolTrue, 
+                            NISysCfgIncludeCachedResultsOnlyIfOnline, NISysCfgSystemNameFormatIp,
+                            10000,NISysCfgBoolTrue,&enumSystemHandle);
+
+    while(status = NISysCfgNextSystemInfo(enumSystemHandle, systemIP) == NISysCfg_OK) //Iterate through systems found
+    {
+        NISysCfgInitializeSession(systemIP, NULL, NULL, NISysCfgLocaleDefault, 
+                                        NISysCfgBoolFalse, 10000, NULL, &session);
+
+        NISysCfgGetSystemProperty(session, NISysCfgSystemPropertySerialNumber, serialNumber);
+        NISysCfgCloseHandle(session);
+
+        if( (status = strcmp(argv[2], serialNumber)) == 0) //Found correct target
+        {
+            NISysCfgCloseHandle(enumSystemHandle);
+            printf("%s\n", systemIP);
+            return 0;
+        }
+    }
+
+    printf("Target With SN %s Not Found\n", argv[2]);
+    NISysCfgCloseHandle(enumSystemHandle);
+
+    return 1;
 }
