@@ -106,10 +106,10 @@ int nirtconfig_findAllTargets()
     printf("Finding Available Targets...\n");
 
     status = NISysCfgFindSystems(NULL, NULL, NISysCfgBoolTrue, 
-                            NISysCfgIncludeCachedResultsNone, NISysCfgSystemNameFormatHostname,
+                            NISysCfgIncludeCachedResultsOnlyIfOnline, NISysCfgSystemNameFormatHostname,
                             10000,NISysCfgBoolTrue,&enumSystemHandle);
 
-    printf("%-25s%-20s%-15s%s\n", "HOSTNAME", "IP ADDR", "MODEL", "SERIAL NUMBER");
+    printf("%-35s%-20s%-15s%s\n", "HOSTNAME", "IP ADDR", "MODEL", "SERIAL NUMBER");
 
     while(status = NISysCfgNextSystemInfo(enumSystemHandle, systemName) == NISysCfg_OK) //Iterate through systems found
     {
@@ -137,7 +137,7 @@ void nirtconfig_printSystemInfo(NISysCfgSessionHandle session)
     NISysCfgGetSystemProperty(session, NISysCfgSystemPropertyIpAddress, ipaddr);
     NISysCfgGetSystemProperty(session, NISysCfgSystemPropertySerialNumber, serialNumber);
 
-    printf("%-25s%-20s%-15s%s\n", hostname, ipaddr, model, serialNumber);
+    printf("%-35s%-20s%-15s%s\n", hostname, ipaddr, model, serialNumber);
 }
 
 int nirtconfig_getImage(int argc, char** argv)
@@ -307,7 +307,7 @@ int nirtconfig_setHostname(int argc, char** argv)
     NISysCfgSessionHandle session = NULL;
     int status = 0;
 
-    status = NISysCfgInitializeSession(argv[2], "admin", "", NISysCfgLocaleDefault, 
+    status = NISysCfgInitializeSession(argv[2], NULL, NULL, NISysCfgLocaleDefault, 
                                         NISysCfgBoolFalse, 10000, NULL, &session);
 
     if (status != 0) //error opening session
@@ -333,7 +333,7 @@ int nirtconfig_setHostname(int argc, char** argv)
 
 int nirtconfig_setIpAddress(int argc, char** argv)
 {
-    if (argc != 4) //Check for correct number of incoming arguments
+    if (argc < 4) //Check for correct number of incoming arguments
     {
         printf("Error Expecting Arguments: sethostname <TARGETNAME> <NEW_IP>\n");
         return 0;
@@ -342,7 +342,7 @@ int nirtconfig_setIpAddress(int argc, char** argv)
     NISysCfgSessionHandle session = NULL;
     int status = 0;
 
-    status = NISysCfgInitializeSession(argv[2], "admin", "", NISysCfgLocaleDefault, 
+    status = NISysCfgInitializeSession(argv[2], NULL, NULL, NISysCfgLocaleDefault, 
                                         NISysCfgBoolFalse, 10000, NULL, &session);
 
     if (status != 0) //error opening session
@@ -399,16 +399,20 @@ int nirtconfig_restartTarget(int argc, char** argv)
 
 int nirtconfig_updateFirmware(int argc, char** argv)
 {
-    if (argc != 4) //Check for correct number of incoming arguments
+    if (argc < 4) //Check for correct number of incoming arguments
     {
         printf("Error Expecting Arguments: updatefirmware <TARGETNAME> <FIRMWARE_PATH>\n");
         return 0;
     }
 
     NISysCfgSessionHandle session = NULL;
+    char username[NISYSCFG_SIMPLE_STRING_LENGTH] = "";
+    char password[NISYSCFG_SIMPLE_STRING_LENGTH] = "";
     int status = 0;
 
-    status = NISysCfgInitializeSession(argv[2], "admin", "", NISysCfgLocaleDefault, 
+    nirtconfig_getCredentials(argc, argv, username, password);
+
+    status = NISysCfgInitializeSession(argv[2], username, password, NISysCfgLocaleDefault, 
                                         NISysCfgBoolFalse, 10000, NULL, &session);
 
     if (status != 0) //error opening session
@@ -471,6 +475,8 @@ void nirtconfig_getCredentials(int argc, char** argv, char* username, char* pass
             case 'p':
                 strcpy(password, optarg);
                 break;
+            
+            default: break;
         }
     }
 }
