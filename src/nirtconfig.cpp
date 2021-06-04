@@ -421,21 +421,12 @@ int nirtconfig_updateFirmware(int argc, char** argv)
         return status;
     }
 
-    NISysCfgEnumResourceHandle resourceHandle = NULL;
     NISysCfgResourceHandle resource = NULL;
-    NISysCfgFilterHandle filter = NULL;
- 
-    NISysCfgCreateFilter(session, &filter);
-    NISysCfgSetFilterProperty(filter, NISysCfgFilterPropertySupportsFirmwareUpdate, NISysCfgBoolTrue);
-    NISysCfgSetFilterProperty(filter, NISysCfgFilterPropertyResourceName, "system");
-
-    NISysCfgFindHardware(session, NISysCfgFilterModeMatchValuesAll, filter, NULL, &resourceHandle);
-
     NISysCfgFirmwareStatus firmwareStatus;
     char* detailedResults = NULL;
     int percentComplete = 0;
 
-    if (status = NISysCfgNextResource(session, resourceHandle, &resource) == NISysCfg_OK) //Get hardware resource
+    if (status = status = nirtconfig_findFirmwareResource(session, &resource) == NISysCfg_OK) //Get hardware resource
     {
         status = NISysCfgUpgradeFirmwareFromFile(resource, argv[3], NISysCfgBoolTrue, NISysCfgBoolTrue, NISysCfgBoolFalse, &firmwareStatus, &detailedResults);
 
@@ -454,7 +445,6 @@ int nirtconfig_updateFirmware(int argc, char** argv)
 
     NISysCfgFreeDetailedString(detailedResults);
     NISysCfgCloseHandle(resource);
-    NISysCfgCloseHandle(resourceHandle);
     NISysCfgCloseHandle(session);
 
     return status;
@@ -479,4 +469,25 @@ void nirtconfig_getCredentials(int argc, char** argv, char* username, char* pass
             default: break;
         }
     }
+}
+
+int nirtconfig_findFirmwareResource(NISysCfgSessionHandle session, NISysCfgResourceHandle *resource)
+{
+    int status = 0;
+    NISysCfgEnumResourceHandle resourceHandle = NULL;
+    NISysCfgFilterHandle filter = NULL;
+ 
+    //Set up filter
+    NISysCfgCreateFilter(session, &filter);
+    NISysCfgSetFilterProperty(filter, NISysCfgFilterPropertySupportsFirmwareUpdate, NISysCfgBoolTrue);
+    NISysCfgSetFilterProperty(filter, NISysCfgFilterPropertyResourceName, "system");
+
+    //Find resource 
+    NISysCfgFindHardware(session, NISysCfgFilterModeMatchValuesAll, filter, NULL, &resourceHandle);
+    status = NISysCfgNextResource(session, resourceHandle, resource);
+
+    //Free memory
+    NISysCfgCloseHandle(resourceHandle);
+    
+    return status;
 }
