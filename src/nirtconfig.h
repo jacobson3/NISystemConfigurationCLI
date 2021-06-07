@@ -12,6 +12,7 @@ int nirtconfig_setIpAddress(int argc, char** argv);
 int nirtconfig_restartTarget(int argc, char** argv);
 int nirtconfig_updateFirmware(int argc, char** argv);
 int nirtconfig_ipFromSerialNumber(int argc, char** argv);
+int nirtconfig_setModuleMode(int argc, char** argv);
 
 //Subroutines
 int nirtconfig_findSingleTarget(char *targetName);
@@ -21,3 +22,4 @@ void nirtconfig_buildOutputDir(NISysCfgSessionHandle session, char* pathBuffer);
 void nirtconfig_printSelfTestResults(NISysCfgResourceHandle resource);
 void nirtconfig_getCredentials(int argc, char** argv, char* username, char* password);
 int nirtconfig_findFirmwareResource(NISysCfgSessionHandle session, NISysCfgResourceHandle *resource);
+void nirtconfig_setAllModuleModes(NISysCfgSessionHandle session, NISysCfgModuleProgramMode moduleMode);

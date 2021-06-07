@@ -20,6 +20,7 @@ static const struct
     {"restart", nirtconfig_restartTarget},
     {"updatefirmware", nirtconfig_updateFirmware},
     {"findsn", nirtconfig_ipFromSerialNumber},
+    {"setmode", nirtconfig_setModuleMode},
     {NULL, NULL}
 };
 
@@ -530,4 +531,64 @@ int nirtconfig_ipFromSerialNumber(int argc, char** argv)
     NISysCfgCloseHandle(enumSystemHandle);
 
     return 1;
+}
+
+int nirtconfig_setModuleMode(int argc, char** argv)
+{
+    if (argc < 4) //Check for correct number of incoming arguments
+    {
+        printf("Error Expecting Arguments: setmode <TARGETNAME> <scan|fpga|daq>\n");
+        return 1;
+    }
+
+    NISysCfgSessionHandle session = NULL;
+    int status = 0;
+
+    status = NISysCfgInitializeSession(argv[2], NULL, NULL, NISysCfgLocaleDefault, 
+                                        NISysCfgBoolFalse, 10000, NULL, &session);
+
+    if (status != 0) //error opening session
+    {
+        printf("Unable to Connect to Target: %s\n", argv[argc-2]);
+        return status;
+    }
+
+    //Get module programming mode
+    NISysCfgModuleProgramMode moduleMode = NISysCfgModuleProgramModeNone;
+    if (strcmp(argv[3], "scan") == 0) moduleMode = NISysCfgModuleProgramModeRealtimeScan;
+    else if (strcmp(argv[3], "fpga") == 0) moduleMode = NISysCfgModuleProgramModeLabVIEWFpga;
+    else if (strcmp(argv[3], "daq") == 0) moduleMode = NISysCfgModuleProgramModeRealtimeCpu;
+    else return 1;
+
+    nirtconfig_setAllModuleModes(session, moduleMode);
+
+    NISysCfgCloseHandle(session);
+
+    return status;
+}
+
+void nirtconfig_setAllModuleModes(NISysCfgSessionHandle session, NISysCfgModuleProgramMode moduleMode)
+{
+    NISysCfgEnumResourceHandle resourceHandle = NULL;
+    NISysCfgFilterHandle filter = NULL;
+    NISysCfgResourceHandle resource = NULL;
+    char alias[NISYSCFG_SIMPLE_STRING_LENGTH] = "";
+    int status = 0;
+ 
+    //Set up filter
+    NISysCfgCreateFilter(session, &filter);
+    NISysCfgSetFilterProperty(filter, NISysCfgFilterPropertyConnectsToBusType, NISysCfgBusTypeCompactRio);
+
+    //Find resource 
+    NISysCfgFindHardware(session, NISysCfgFilterModeMatchValuesAll, filter, NULL, &resourceHandle);
+    
+    while ( (status = NISysCfgNextResource(session, resourceHandle, &resource)) == NISysCfg_OK) //Iterate through all modules
+    {
+        NISysCfgGetResourceIndexedProperty(resource, NISysCfgIndexedPropertyExpertUserAlias, 0, alias);
+        NISysCfgSetResourceProperty(resource, NISysCfgResourcePropertyModuleProgramMode, moduleMode);
+        printf("Setting Module Mode: %s\n", alias);
+    }
+
+    NISysCfgCloseHandle(resourceHandle);
+    NISysCfgCloseHandle(resource);
 }
