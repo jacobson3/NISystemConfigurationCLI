@@ -90,7 +90,7 @@ int nirtconfig_findSingleTarget(char *targetName)
         return status;
     }
     
-    printf("%-25s%-20s%-15s%s\n", "HOSTNAME", "IP ADDR", "MODEL", "SERIAL NUMBER");
+    printf("%-35s%-20s%-15s%s\n", "HOSTNAME", "IP ADDR", "MODEL", "SERIAL NUMBER");
     nirtconfig_printSystemInfo(session);
 
     status = NISysCfgCloseHandle(session);
