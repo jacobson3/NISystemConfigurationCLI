@@ -215,7 +215,7 @@ int nirtconfig_setImage(int argc, char **argv)
     status = NISysCfgSetSystemImageFromFolder2(session, NISysCfgBoolTrue, argv[3], "", 0, NULL, 
                                             NISysCfgBoolFalse, NISysCfgPreservePrimaryResetOthers);
     
-    status = NISysCfgCloseHandle(session);
+    NISysCfgCloseHandle(session);
     return status;
 }
 
@@ -246,9 +246,9 @@ int nirtconfig_selfTest(int argc, char** argv)
     printf("Running Self Tests...\n");
     
     NISysCfgCreateFilter(session, &filter);
-    NISysCfgSetFilterProperty(filter, NISysCfgFilterPropertyExpertName, "network");
+    NISysCfgSetFilterProperty(filter, NISysCfgFilterPropertySlotNumber, 0);
 
-    NISysCfgFindHardware(session, NISysCfgFilterModeMatchValuesNone, filter, NULL, &resourceHandle);
+    NISysCfgFindHardware(session, NISysCfgFilterModeAllPropertiesExist, filter, NULL, &resourceHandle);
 
     printf("%-40s%-20s%-15s%s\n", "RESOURCE NAME", "PRODUCT NAME", "PASS/FAIL", "DETAILED RESULTS");
     while (status = NISysCfgNextResource(session, resourceHandle, &resource) == NISysCfg_OK) //Iterate through all hardware resources
