@@ -573,6 +573,7 @@ void nirtconfig_setAllModuleModes(NISysCfgSessionHandle session, NISysCfgModuleP
     NISysCfgFilterHandle filter = NULL;
     NISysCfgResourceHandle resource = NULL;
     char alias[NISYSCFG_SIMPLE_STRING_LENGTH] = "";
+    char productName[NISYSCFG_SIMPLE_STRING_LENGTH] = "";
     int status = 0;
  
     //Set up filter
@@ -585,8 +586,10 @@ void nirtconfig_setAllModuleModes(NISysCfgSessionHandle session, NISysCfgModuleP
     while ( (status = NISysCfgNextResource(session, resourceHandle, &resource)) == NISysCfg_OK) //Iterate through all modules
     {
         NISysCfgGetResourceIndexedProperty(resource, NISysCfgIndexedPropertyExpertUserAlias, 0, alias);
+        NISysCfgGetResourceProperty(resource, NISysCfgResourcePropertyProductName, productName);
+
         NISysCfgSetResourceProperty(resource, NISysCfgResourcePropertyModuleProgramMode, moduleMode);
-        printf("Setting Module Mode: %s\n", alias);
+        printf("Setting Module Mode: %s (%s)\n", alias, productName);
     }
 
     NISysCfgCloseHandle(resourceHandle);
