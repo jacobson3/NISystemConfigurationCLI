@@ -53,8 +53,22 @@ int main(int argc, char** argv)
         status = 1;
     }
 
-    if (status != 0) printf("Error: %d\n", status);
+    if (status != 0) nirtconfig_printStatusInfo(status);
+    
     return status;
+}
+
+void nirtconfig_printStatusInfo(int status)
+{
+    printf("Error: %d\n", status);
+
+    char* detailedResults = NULL;
+
+    NISysCfgGetStatusDescription(NULL, (NISysCfgStatus)status, &detailedResults);
+
+    if(strcmp(detailedResults, "") != 0) printf("%s\n", detailedResults);
+
+    NISysCfgFreeDetailedString(detailedResults);
 }
 
 int nirtconfig_find(int argc, char** argv)
@@ -84,11 +98,7 @@ int nirtconfig_findSingleTarget(char *targetName)
     status = NISysCfgInitializeSession(targetName, NULL, NULL, NISysCfgLocaleDefault, 
                                         NISysCfgBoolFalse, 10000, NULL, &session);
 
-    if (status != 0) //Error initializeing session
-    {
-        printf("Target Not Found\n");
-        return status;
-    }
+    if (status != 0) return status;//Error initializeing session
     
     printf("%-35s%-20s%-15s%s\n", "HOSTNAME", "IP ADDR", "MODEL", "SERIAL NUMBER");
     nirtconfig_printSystemInfo(session);
@@ -153,11 +163,7 @@ int nirtconfig_getImage(int argc, char** argv)
         status = NISysCfgInitializeSession(argv[2], NULL, NULL, NISysCfgLocaleDefault, 
                                             NISysCfgBoolFalse, 10000, NULL, &session);
 
-        if (status != 0) //error opening session
-        {
-            printf("Unable to Connect to Target\n");
-            return status;
-        }
+        if (status != 0) return status;//Error initializeing session
 
         printf("Getting Image: %s\n", argv[2]);
 
@@ -170,11 +176,7 @@ int nirtconfig_getImage(int argc, char** argv)
                                          NULL, 0, NULL, NISysCfgBoolTrue, NISysCfgBoolFalse);
     }
 
-    else //no arguments passed
-    {
-        printf("No Target Selected\n");
-        status = 1;
-    }
+    else printf("No Target Selected\n");//no arguments passed
 
     return status;
 }
@@ -204,11 +206,7 @@ int nirtconfig_setImage(int argc, char **argv)
     status = NISysCfgInitializeSession(argv[2], NULL, NULL, NISysCfgLocaleDefault, 
                                         NISysCfgBoolFalse, 10000, NULL, &session);
 
-    if (status != 0) //error opening session
-    {
-        printf("Unable to Connect to Target: %s\n", argv[2]);
-        return status;
-    }
+    if (status != 0) return status;//Error initializeing session
 
     printf("Imaging Target: %s\nImage Used: %s\n", argv[2], argv[3]);
 
@@ -233,11 +231,7 @@ int nirtconfig_selfTest(int argc, char** argv)
     status = NISysCfgInitializeSession(argv[2], NULL, NULL, NISysCfgLocaleDefault, 
                                         NISysCfgBoolFalse, 10000, NULL, &session);
 
-    if (status != 0) //error opening session
-    {
-        printf("Unable to Connect to Target: %s\n", argv[2]);
-        return status;
-    }
+    if (status != 0) return status;//Error initializeing session
 
     NISysCfgEnumResourceHandle resourceHandle = NULL;
     NISysCfgResourceHandle resource = NULL;
@@ -295,7 +289,6 @@ void nirtconfig_printSelfTestResults(NISysCfgResourceHandle resource)
     else printf("%-40s%-20s%-15s%s\n", resourceName, productName, passFail, detailedResults);
 
     NISysCfgFreeDetailedString(detailedResults);
-
 }
 
 int nirtconfig_setHostname(int argc, char** argv)
@@ -312,11 +305,7 @@ int nirtconfig_setHostname(int argc, char** argv)
     status = NISysCfgInitializeSession(argv[2], NULL, NULL, NISysCfgLocaleDefault, 
                                         NISysCfgBoolFalse, 10000, NULL, &session);
 
-    if (status != 0) //error opening session
-    {
-        printf("Unable to Connect to Target: %s\n", argv[2]);
-        return status;
-    }
+    if (status != 0) return status;//Error initializeing session
 
     printf("Updating Hostname of %s to %s\n", argv[2], argv[3]);
 
@@ -347,11 +336,7 @@ int nirtconfig_setIpAddress(int argc, char** argv)
     status = NISysCfgInitializeSession(argv[2], NULL, NULL, NISysCfgLocaleDefault, 
                                         NISysCfgBoolFalse, 10000, NULL, &session);
 
-    if (status != 0) //error opening session
-    {
-        printf("Unable to Connect to Target: %s\n", argv[2]);
-        return status;
-    }
+    if (status != 0) return status;//Error initializeing session
 
     printf("Updating IP Address of %s to %s\n", argv[2], argv[3]);
 
@@ -383,11 +368,7 @@ int nirtconfig_restartTarget(int argc, char** argv)
     status = NISysCfgInitializeSession(argv[2], NULL, NULL, NISysCfgLocaleDefault, 
                                         NISysCfgBoolFalse, 10000, NULL, &session);
 
-    if (status != 0) //error opening session
-    {
-        printf("Unable to Connect to Target: %s\n", argv[2]);
-        return status;
-    }
+    if (status != 0) return status;//Error initializeing session
 
     char ipAddr[NISYSCFG_SIMPLE_STRING_LENGTH] = "";
 
@@ -417,11 +398,7 @@ int nirtconfig_updateFirmware(int argc, char** argv)
     status = NISysCfgInitializeSession(argv[argc-2], username, password, NISysCfgLocaleDefault, 
                                         NISysCfgBoolFalse, 10000, NULL, &session);
 
-    if (status != 0) //error opening session
-    {
-        printf("Unable to Connect to Target: %s\n", argv[argc-2]);
-        return status;
-    }
+    if (status != 0) return status;//Error initializeing session
 
     NISysCfgResourceHandle resource = NULL;
     NISysCfgFirmwareStatus firmwareStatus;
@@ -501,6 +478,7 @@ int nirtconfig_ipFromSerialNumber(int argc, char** argv)
         printf("Error Expecting Arguments: findsn <SERIAL_NUMBER> \n");
         return 0;
     }
+
     NISysCfgEnumSystemHandle enumSystemHandle = NULL;
     NISysCfgSessionHandle session = NULL;
     char systemIP[NISYSCFG_SIMPLE_STRING_LENGTH] = "";
@@ -530,7 +508,7 @@ int nirtconfig_ipFromSerialNumber(int argc, char** argv)
     printf("Target With SN %s Not Found\n", argv[2]);
     NISysCfgCloseHandle(enumSystemHandle);
 
-    return 1;
+    return status;
 }
 
 int nirtconfig_setModuleMode(int argc, char** argv)
@@ -547,18 +525,14 @@ int nirtconfig_setModuleMode(int argc, char** argv)
     status = NISysCfgInitializeSession(argv[2], NULL, NULL, NISysCfgLocaleDefault, 
                                         NISysCfgBoolFalse, 10000, NULL, &session);
 
-    if (status != 0) //error opening session
-    {
-        printf("Unable to Connect to Target: %s\n", argv[argc-2]);
-        return status;
-    }
+    if (status != 0) return status;//Error initializeing session
 
     //Get module programming mode
     NISysCfgModuleProgramMode moduleMode = NISysCfgModuleProgramModeNone;
     if (strcmp(argv[3], "scan") == 0) moduleMode = NISysCfgModuleProgramModeRealtimeScan;
     else if (strcmp(argv[3], "fpga") == 0) moduleMode = NISysCfgModuleProgramModeLabVIEWFpga;
     else if (strcmp(argv[3], "daq") == 0) moduleMode = NISysCfgModuleProgramModeRealtimeCpu;
-    else return 1;
+    else return status;
 
     nirtconfig_setAllModuleModes(session, moduleMode);
 
@@ -610,11 +584,7 @@ int nirtconfig_listHardware(int argc, char** argv)
     status = NISysCfgInitializeSession(argv[2], NULL, NULL, NISysCfgLocaleDefault, 
                                         NISysCfgBoolFalse, 10000, NULL, &session);
 
-    if (status != 0) //error opening session
-    {
-        printf("Unable to Connect to Target: %s\n", argv[2]);
-        return status;
-    }
+    if (status != 0) return status;//Error initializeing session
 
     NISysCfgEnumResourceHandle resourceHandle = NULL;
     NISysCfgResourceHandle resource = NULL;

@@ -25,6 +25,7 @@ int nirtconfig_setModuleMode(int argc, char** argv);
 int nirtconfig_listHardware(int argc, char** argv);
 
 //Subroutines
+void nirtconfig_printStatusInfo(int status);
 int nirtconfig_findSingleTarget(char *targetName);
 int nirtconfig_findAllTargets();
 void nirtconfig_printSystemInfo(NISysCfgSessionHandle session);
