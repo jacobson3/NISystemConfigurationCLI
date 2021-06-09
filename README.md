@@ -2,6 +2,8 @@
 
 ### **find**
 
+[nirtconfig_findAllTargets](https://github.com/jacobson3/NISystemConfigurationCLI/blob/main/src/nirtconfig.c#L113)
+
 Finds all available hardware on the network and reports back the hostname, IP address, model, and serial number of each target.
 
 ### **find [TARGET_NAME]**
