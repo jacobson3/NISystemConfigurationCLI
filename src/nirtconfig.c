@@ -21,6 +21,7 @@ static const struct
     {"updatefirmware", nirtconfig_updateFirmware},
     {"findsn", nirtconfig_ipFromSerialNumber},
     {"setmode", nirtconfig_setModuleMode},
+    {"listhw", nirtconfig_listHardware},
     {NULL, NULL}
 };
 
@@ -31,12 +32,11 @@ int main(int argc, char** argv)
 
     if (argc > 1) //Command passed as argument
     {
-        std::string command = argv[1];
         int i = 0;
 
         while (nirtFunctions[i].name != NULL) //Iterate through function lookup table
         {
-            if (nirtFunctions[i].name == command) //Check if command matches function in table
+            if (strcmp(nirtFunctions[i].name, argv[1]) == 0) //Check if command matches function in table
             {
                 status = (*nirtFunctions[i].fpointer)(argc, argv);
                 break;
@@ -594,4 +594,63 @@ void nirtconfig_setAllModuleModes(NISysCfgSessionHandle session, NISysCfgModuleP
 
     NISysCfgCloseHandle(resourceHandle);
     NISysCfgCloseHandle(resource);
+}
+
+int nirtconfig_listHardware(int argc, char** argv)
+{
+    if (argc != 3) //Check for correct number of incoming arguments
+    {
+        printf("Error Expecting Arguments: listhw <TARGETNAME>");
+        return 0;
+    }
+
+    NISysCfgSessionHandle session = NULL;
+    int status = 0;
+
+    status = NISysCfgInitializeSession(argv[2], NULL, NULL, NISysCfgLocaleDefault, 
+                                        NISysCfgBoolFalse, 10000, NULL, &session);
+
+    if (status != 0) //error opening session
+    {
+        printf("Unable to Connect to Target: %s\n", argv[2]);
+        return status;
+    }
+
+    NISysCfgEnumResourceHandle resourceHandle = NULL;
+    NISysCfgResourceHandle resource = NULL;
+    NISysCfgFilterHandle filter = NULL;
+ 
+    NISysCfgCreateFilter(session, &filter);
+    NISysCfgSetFilterProperty(filter, NISysCfgFilterPropertySlotNumber, 0);
+
+    NISysCfgFindHardware(session, NISysCfgFilterModeAllPropertiesExist, filter, NULL, &resourceHandle);
+
+    printf("%-10s%-15s%s\n", "SLOT", "MODULE", "ALIAS");
+    while (status = NISysCfgNextResource(session, resourceHandle, &resource) == NISysCfg_OK) //Iterate through all hardware resources
+    {
+        nirtconfig_printHardwareList(resource);
+        NISysCfgCloseHandle(resource);
+    }
+
+    status = NISysCfgCloseHandle(resourceHandle);
+    status = NISysCfgCloseHandle(session);
+
+    return status;
+}
+
+void nirtconfig_printHardwareList(NISysCfgResourceHandle resource)
+{
+    char productName[NISYSCFG_SIMPLE_STRING_LENGTH] = "";
+    char alias [NISYSCFG_SIMPLE_STRING_LENGTH] = "";
+    char serialNumber[NISYSCFG_SIMPLE_STRING_LENGTH] = "";
+    int slotNumber = 0;
+    int status = 0;
+
+    NISysCfgGetResourceProperty(resource, NISysCfgResourcePropertyProductName, productName);
+    NISysCfgGetResourceProperty(resource, NISysCfgResourcePropertySlotNumber, &slotNumber);
+    NISysCfgGetResourceIndexedProperty(resource, NISysCfgIndexedPropertyExpertUserAlias, 0, alias);
+
+    NISysCfgGetResourceProperty(resource, NISysCfgResourcePropertySerialNumber, serialNumber);
+
+    if (strcmp(serialNumber, "") != 0) printf("%-10d%-15s%s\n", slotNumber, productName, alias);
 }
