@@ -22,6 +22,7 @@ static const struct
     {"findsn", nirtconfig_ipFromSerialNumber},
     {"setmode", nirtconfig_setModuleMode},
     {"listhw", nirtconfig_listHardware},
+    {"format", nirtconfig_format},
     {NULL, NULL}
 };
 
@@ -574,7 +575,7 @@ int nirtconfig_listHardware(int argc, char** argv)
 {
     if (argc != 3) //Check for correct number of incoming arguments
     {
-        printf("Error Expecting Arguments: listhw <TARGETNAME>");
+        printf("Error Expecting Arguments: listhw <TARGETNAME>\n");
         return 0;
     }
 
@@ -623,4 +624,32 @@ void nirtconfig_printHardwareList(NISysCfgResourceHandle resource)
     NISysCfgGetResourceProperty(resource, NISysCfgResourcePropertySerialNumber, serialNumber);
 
     if (strcmp(serialNumber, "") != 0) printf("%-10d%-15s%s\n", slotNumber, productName, alias);
+}
+
+int nirtconfig_format(int argc, char** argv)
+{
+    if (argc < 3) //Check for correct number of incoming arguments
+    {
+        printf("Error Expecting Arguments: format <TARGETNAME>\n");
+        return 0;
+    }
+
+    NISysCfgSessionHandle session = NULL;
+    char username[NISYSCFG_SIMPLE_STRING_LENGTH] = "";
+    char password[NISYSCFG_SIMPLE_STRING_LENGTH] = "";
+    int status = 0;
+
+    nirtconfig_getCredentials(argc, argv, username, password);
+
+    status = NISysCfgInitializeSession(argv[argc-1], username, password, NISysCfgLocaleDefault, 
+                                        NISysCfgBoolFalse, 10000, NULL, &session);
+
+    if (status != 0) return status;//Error initializeing session
+    
+    printf("Formatting...\n");
+    
+    status = NISysCfgFormat(session, NISysCfgBoolTrue, NISysCfgBoolTrue, 
+                            NISysCfgFileSystemDefault, NISysCfgPreservePrimaryResetOthers, 120000);
+
+    return status;
 }
