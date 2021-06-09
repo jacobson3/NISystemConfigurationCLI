@@ -23,6 +23,7 @@ static const struct
     {"setmode", nirtconfig_setModuleMode},
     {"listhw", nirtconfig_listHardware},
     {"format", nirtconfig_format},
+    {"setalias", nirtconfig_setAlias},
     {NULL, NULL}
 };
 
@@ -650,6 +651,42 @@ int nirtconfig_format(int argc, char** argv)
     
     status = NISysCfgFormat(session, NISysCfgBoolTrue, NISysCfgBoolTrue, 
                             NISysCfgFileSystemDefault, NISysCfgPreservePrimaryResetOthers, 120000);
+
+    return status;
+}
+
+int nirtconfig_setAlias(int argc, char** argv)
+{
+    if (argc != 5) //Check for correct number of incoming arguments
+    {
+        printf("Error Expecting Arguments: listhw <TARGETNAME> <SLOT> <NEW_ALIAS>\n");
+        return 0;
+    }
+
+    NISysCfgSessionHandle session = NULL;
+    int status = 0;
+
+    status = NISysCfgInitializeSession(argv[2], NULL, NULL, NISysCfgLocaleDefault, 
+                                        NISysCfgBoolFalse, 10000, NULL, &session);
+
+    if (status != 0) return status;//Error initializeing session
+
+    NISysCfgEnumResourceHandle resourceHandle = NULL;
+    NISysCfgResourceHandle resource = NULL;
+    NISysCfgFilterHandle filter = NULL;
+    NISysCfgBool nameExisted;
+    NISysCfgResourceHandle overwrittenResource = NULL;
+ 
+    NISysCfgCreateFilter(session, &filter);
+    NISysCfgSetFilterProperty(filter, NISysCfgFilterPropertySlotNumber, argv[3]);
+
+    NISysCfgFindHardware(session, NISysCfgFilterModeAllPropertiesExist, filter, NULL, &resourceHandle);
+    NISysCfgNextResource(session, resourceHandle, &resource);
+
+    status = NISysCfgRenameResource(resource, argv[4], NISysCfgBoolFalse, NISysCfgBoolTrue, &nameExisted, &overwrittenResource);
+
+    NISysCfgCloseHandle(resourceHandle);
+    NISysCfgCloseHandle(session);
 
     return status;
 }

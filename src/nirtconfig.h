@@ -24,6 +24,7 @@ int nirtconfig_ipFromSerialNumber(int argc, char** argv);
 int nirtconfig_setModuleMode(int argc, char** argv);
 int nirtconfig_listHardware(int argc, char** argv);
 int nirtconfig_format(int argc, char** argv);
+int nirtconfig_setAlias(int argc, char** argv);
 
 //Subroutines
 void nirtconfig_printStatusInfo(int status);
