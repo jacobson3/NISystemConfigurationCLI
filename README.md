@@ -23,7 +23,7 @@ NI-PXIe8840-2F215A8E               10.1.128.48         PXIe-8840      2F215A8E
 **Relevant Function Calls**
 + [NISysCfgFindSystems](https://zone.ni.com/reference/en-XX/help/373242N-01/nisyscfgcvi/nisyscfgfindsystems/)
 
-**Implemented:** [nirtconfig_findAllTargets](https://github.com/jacobson3/NISystemConfigurationCLI/blob/main/src/nirtconfig.c#L110)
+**Implemented:** [nirtconfig_findAllTargets](https://github.com/jacobson3/NISystemConfigurationCLI/blob/main/src/nirtconfig.c#L112)
 
 ### Option 2: Find Target by Hostname or IP
 
@@ -43,7 +43,7 @@ NI-PXIe-8880-03182D37              10.1.128.113        PXIe-8880      03182D37
 **Relevant Function Calls**
 + [NISysCfgInitializeSession](https://zone.ni.com/reference/en-XX/help/373242N-01/nisyscfgcvi/nisyscfgfindsystems/)
 
-**Implemented:** [nirtconfig_findSingleTarget](https://github.com/jacobson3/NISystemConfigurationCLI/blob/main/src/nirtconfig.c#L92)
+**Implemented:** [nirtconfig_findSingleTarget](https://github.com/jacobson3/NISystemConfigurationCLI/blob/main/src/nirtconfig.c#L93)
 
 ### Option 3: Find Target by Serial Number
 
@@ -62,7 +62,7 @@ NI-PXIe-8880-03182D37              10.1.128.113        PXIe-8880      03182D37
 **Relevant Function Calls**
 + [NISysCfgFindSystems](https://zone.ni.com/reference/en-XX/help/373242N-01/nisyscfgcvi/nisyscfgfindsystems/)
 
-**Implemented:** [nirtconfig_ipFromSerialNumber](https://github.com/jacobson3/NISystemConfigurationCLI/blob/main/src/nirtconfig.c#L460)
+**Implemented:** [nirtconfig_ipFromSerialNumber](https://github.com/jacobson3/NISystemConfigurationCLI/blob/main/src/nirtconfig.c#L473)
 
 ## Format a Target
 
@@ -79,7 +79,7 @@ Formatting...
 **Relevant Function Calls**
 + [NISysCfgFormat](https://zone.ni.com/reference/en-XX/help/373242N-01/nisyscfgcvi/nisyscfgformat/)
 
-**Implemented:** [nirtconfig_format](https://github.com/jacobson3/NISystemConfigurationCLI/blob/main/src/nirtconfig.c#L623)
+**Implemented:** [nirtconfig_format](https://github.com/jacobson3/NISystemConfigurationCLI/blob/main/src/nirtconfig.c#L642)
 
 ## Set the Image of a Real-Time System
 
@@ -98,7 +98,7 @@ Image Used: /home/mjacobson/Desktop/NI-PXIe-8861-BenJ
 **Relevant Function Calls**
 + [NISysCfgSetSystemImageFromFolder2](https://zone.ni.com/reference/en-XX/help/373242N-01/nisyscfgcvi/nisyscfgsetsystemimagefromfolder2/)
 
-**Implemented:** [nirtconfig_setImage](https://github.com/jacobson3/NISystemConfigurationCLI/blob/main/src/nirtconfig.c#L192)
+**Implemented:** [nirtconfig_setImage](https://github.com/jacobson3/NISystemConfigurationCLI/blob/main/src/nirtconfig.c#L195)
 
 ## Get the Image of a Real-Time System
 
@@ -117,7 +117,7 @@ Saving To: "/home/mjacobson/Desktop/NI-PXIe-8861-BenJ"
 **Relevant Function Calls**
 + [NISysCfgGetSystemImageAsFolder2](https://zone.ni.com/reference/en-XX/help/373242N-01/nisyscfgcvi/nisyscfggetsystemimageasfolder2/)
 
-**Implemented:** [nirtconfig_getImage](https://github.com/jacobson3/NISystemConfigurationCLI/blob/main/src/nirtconfig.c#L154)
+**Implemented:** [nirtconfig_getImage](https://github.com/jacobson3/NISystemConfigurationCLI/blob/main/src/nirtconfig.c#L156)
 
 ## Update the Firmware of a System
 
@@ -137,7 +137,7 @@ Firmware: /home/mjacobson/Desktop/SCM/NISystemConfigurationCLI/build/firmware/cR
 **Relevant Function Calls**
 + [NISysCfgUpgradeFirmwareFromFile](https://zone.ni.com/reference/en-XX/help/373242N-01/nisyscfgcvi/nisyscfgupgradefirmwarefromfile/)
 
-**Implemented:** [nirtconfig_updateFirmware](https://github.com/jacobson3/NISystemConfigurationCLI/blob/main/src/nirtconfig.c#L381)
+**Implemented:** [nirtconfig_updateFirmware](https://github.com/jacobson3/NISystemConfigurationCLI/blob/main/src/nirtconfig.c#L392)
 
 ## Self Test Hardware
 
@@ -159,7 +159,7 @@ Mod3                                    NI 9205             Pass
 **Relevant Function Calls**
 + [NISysCfgSelfTestHardware](https://zone.ni.com/reference/en-XX/help/373242N-01/nisyscfgcvi/nisyscfgselftesthardware/)
 
-**Implemented:** [nirtconfig_selfTest](https://github.com/jacobson3/NISystemConfigurationCLI/blob/main/src/nirtconfig.c#L217)
+**Implemented:** [nirtconfig_selfTest](https://github.com/jacobson3/NISystemConfigurationCLI/blob/main/src/nirtconfig.c#L221)
 
 ## Change the Hostname of a System
 
@@ -179,7 +179,7 @@ Updating Hostname of 10.1.128.131 to Lab1-HIL1-8861
     + NISysCfgSystemPropertyHostname
 + [NISysCfgSaveSystemChanges](https://zone.ni.com/reference/en-XX/help/373242N-01/nisyscfgcvi/nisyscfgsavesystemchanges/)
 
-**Implemented:** [nirtconfig_setHostname](https://github.com/jacobson3/NISystemConfigurationCLI/blob/main/src/nirtconfig.c#L290)
+**Implemented:** [nirtconfig_setHostname](https://github.com/jacobson3/NISystemConfigurationCLI/blob/main/src/nirtconfig.c#L297)
 
 ## Change the IP of a System
 
@@ -200,7 +200,7 @@ Updating IP Address of 10.1.128.42 to 10.1.128.43
     + NISysCfgSystemPropertyIpAddressMode
 + [NISysCfgSaveSystemChanges](https://zone.ni.com/reference/en-XX/help/373242N-01/nisyscfgcvi/nisyscfgsavesystemchanges/)
 
-**Implemented:** [FunctionName](https://github.com/jacobson3/NISystemConfigurationCLI/blob/main/src/nirtconfig.c#L321)
+**Implemented:** [nirtconfig_setIpAddress](https://github.com/jacobson3/NISystemConfigurationCLI/blob/main/src/nirtconfig.c#L329)
 
 ## Restart a System
 
@@ -219,7 +219,7 @@ Restarted With IP Address: 10.1.128.131
 **Relevant Function Calls**
 + [NISysCfgRestart](https://zone.ni.com/reference/en-XX/help/373242N-01/nisyscfgcvi/nisyscfgrestart/)
 
-**Implemented:** [nirtconfig_restartTarget](https://github.com/jacobson3/NISystemConfigurationCLI/blob/main/src/nirtconfig.c#L353)
+**Implemented:** [nirtconfig_restartTarget](https://github.com/jacobson3/NISystemConfigurationCLI/blob/main/src/nirtconfig.c#L362)
 
 ## Change the Programming Mode of a C-Series Module
 
@@ -240,7 +240,7 @@ Setting Module Mode: Mod3 (NI 9205)
     + NISysCfgResourcePropertyModuleProgramMode
 + [NISysCfgSaveSystemChanges](https://zone.ni.com/reference/en-XX/help/373242N-01/nisyscfgcvi/nisyscfgsavesystemchanges/)
 
-**Implemented:** [nirtconfig_setModuleMode](https://github.com/jacobson3/NISystemConfigurationCLI/blob/main/src/nirtconfig.c#L500)
+**Implemented:** [nirtconfig_setModuleMode](https://github.com/jacobson3/NISystemConfigurationCLI/blob/main/src/nirtconfig.c#L513)
 
 ## Change the Alias of a Module
 
@@ -255,4 +255,4 @@ Setting Module Mode: Mod3 (NI 9205)
 **Relevant Function Calls**
 + [NISysCfgRenameResource](https://zone.ni.com/reference/en-XX/help/373242N-01/nisyscfgcvi/nisyscfgrenameresource/)
 
-**Implemented:** [nirtconfig_setAlias](https://github.com/jacobson3/NISystemConfigurationCLI/blob/main/src/nirtconfig.c#L651)
+**Implemented:** [nirtconfig_setAlias](https://github.com/jacobson3/NISystemConfigurationCLI/blob/main/src/nirtconfig.c#L671)
