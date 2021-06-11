@@ -538,6 +538,8 @@ void nirtconfig_setAllModuleModes(NISysCfgSessionHandle session, NISysCfgModuleP
     NISysCfgResourceHandle resource = NULL;
     char alias[NISYSCFG_SIMPLE_STRING_LENGTH] = "";
     char productName[NISYSCFG_SIMPLE_STRING_LENGTH] = "";
+    NISysCfgBool changesRequired;
+    char *detailedResults;
     int status = 0;
  
     NISysCfgCreateFilter(session, &filter);
@@ -552,10 +554,13 @@ void nirtconfig_setAllModuleModes(NISysCfgSessionHandle session, NISysCfgModuleP
         printf("Setting Module Mode: %s (%s)\n", alias, productName);
 
         NISysCfgSetResourceProperty(resource, NISysCfgResourcePropertyModuleProgramMode, moduleMode);
+
+        NISysCfgSaveResourceChanges(resource, &changesRequired, &detailedResults);
+        NISysCfgCloseHandle(resource);
     }
 
+    NISysCfgFreeDetailedString(detailedResults);
     NISysCfgCloseHandle(resourceHandle);
-    NISysCfgCloseHandle(resource);
 }
 
 int nirtconfig_listHardware(int argc, char** argv)
