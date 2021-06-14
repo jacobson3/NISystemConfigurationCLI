@@ -690,11 +690,13 @@ int nirtconfig_setAlias(int argc, char** argv)
     NISysCfgFilterHandle filter = NULL;
     NISysCfgBool nameExisted;
     NISysCfgResourceHandle overwrittenResource = NULL;
+    int slotNumber = 0;
+    sscanf(argv[3], "%d", &slotNumber); //convert char argument to int
 
     NISysCfgCreateFilter(session, &filter);
-    NISysCfgSetFilterProperty(filter, NISysCfgFilterPropertySlotNumber, argv[3]);
+    NISysCfgSetFilterProperty(filter, NISysCfgFilterPropertySlotNumber, slotNumber);
 
-    NISysCfgFindHardware(session, NISysCfgFilterModeAllPropertiesExist, filter, NULL, &resourceHandle);
+    NISysCfgFindHardware(session, NISysCfgFilterModeMatchValuesAll, filter, NULL, &resourceHandle);
     NISysCfgNextResource(session, resourceHandle, &resource);
 
     status = NISysCfgRenameResource(resource, argv[4], NISysCfgBoolFalse, NISysCfgBoolTrue, &nameExisted, &overwrittenResource);
