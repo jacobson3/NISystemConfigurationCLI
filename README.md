@@ -1,8 +1,24 @@
 # NISystemConfigurationCLI
 
-## Discovering a Real-Time System
+Example demonstrating how to use the NI System Configuration API to automate the deployment of an NI Real-Time system through the command line.
 
-### Option 1: List All Systems on Network
+## Installation
+
+### Dependencies
+
++ NI System Configuration
+
+### Building
+
+1. Open `src/nirtconfig.c` in Visual Studio Code
+2. Run the command `Tasks: Configure Default Build Task` and select `C/C++: g++ build active file` which is the task defined in `.vscode/tasks.json`
+3. Run the command `Tasks: Run Build Task`to build the nirtconfig executable into the build folder
+
+## Usage
+
+### **Discovering a Real-Time System**
+
+### <ins>Option 1: List All Systems on Network</ins>
 
 **Command:** `find`
 
@@ -64,7 +80,7 @@ NI-PXIe-8880-03182D37              10.1.128.113        PXIe-8880      03182D37
 
 **Implemented:** [nirtconfig_ipFromSerialNumber](https://github.com/jacobson3/NISystemConfigurationCLI/blob/main/src/nirtconfig.c#L473)
 
-## Format a Target
+### Format a Target
 
 **Command:** `format <TARGET_NAME>`
 
@@ -81,7 +97,7 @@ Formatting...
 
 **Implemented:** [nirtconfig_format](https://github.com/jacobson3/NISystemConfigurationCLI/blob/main/src/nirtconfig.c#L642)
 
-## Set the Image of a Real-Time System
+### Set the Image of a Real-Time System
 
 **Command:** `setimage [TARGET_NAME] [IMAGE_PATH]`
 
@@ -100,7 +116,7 @@ Image Used: /home/mjacobson/Desktop/NI-PXIe-8861-BenJ
 
 **Implemented:** [nirtconfig_setImage](https://github.com/jacobson3/NISystemConfigurationCLI/blob/main/src/nirtconfig.c#L195)
 
-## Get the Image of a Real-Time System
+### Get the Image of a Real-Time System
 
 **Command:** `getimage [TARGET_NAME]`
 
@@ -119,7 +135,7 @@ Saving To: "/home/mjacobson/Desktop/NI-PXIe-8861-BenJ"
 
 **Implemented:** [nirtconfig_getImage](https://github.com/jacobson3/NISystemConfigurationCLI/blob/main/src/nirtconfig.c#L156)
 
-## Update the Firmware of a System
+### Update the Firmware of a System
 
 **Command:** `updatefirmware [TARGET_NAME] [FIRMWARE_PATH] [-u USERNAME] [-p PASSWORD]`
 
@@ -139,7 +155,7 @@ Firmware: /home/mjacobson/Desktop/SCM/NISystemConfigurationCLI/build/firmware/cR
 
 **Implemented:** [nirtconfig_updateFirmware](https://github.com/jacobson3/NISystemConfigurationCLI/blob/main/src/nirtconfig.c#L392)
 
-## Self Test Hardware
+### Self Test Hardware
 
 **Command:** `selftest [TARGET_NAME]`
 
@@ -161,7 +177,7 @@ Mod3                                    NI 9205             Pass
 
 **Implemented:** [nirtconfig_selfTest](https://github.com/jacobson3/NISystemConfigurationCLI/blob/main/src/nirtconfig.c#L221)
 
-## Change the Hostname of a System
+### Change the Hostname of a System
 
 **Command:** `sethostname [TARGET_NAME] [NEW_TARGET_NAME]`
 
@@ -181,7 +197,7 @@ Updating Hostname of 10.1.128.131 to Lab1-HIL1-8861
 
 **Implemented:** [nirtconfig_setHostname](https://github.com/jacobson3/NISystemConfigurationCLI/blob/main/src/nirtconfig.c#L297)
 
-## Change the IP of a System
+### Change the IP of a System
 
 **Command:** `setip [TARGET_NAME] [NEW_IP_ADDRESS]`
 
@@ -202,7 +218,7 @@ Updating IP Address of 10.1.128.42 to 10.1.128.43
 
 **Implemented:** [nirtconfig_setIpAddress](https://github.com/jacobson3/NISystemConfigurationCLI/blob/main/src/nirtconfig.c#L329)
 
-## Restart a System
+### Restart a System
 
 **Command:** `restart [TARGET_NAME]`
 
@@ -221,7 +237,7 @@ Restarted With IP Address: 10.1.128.131
 
 **Implemented:** [nirtconfig_restartTarget](https://github.com/jacobson3/NISystemConfigurationCLI/blob/main/src/nirtconfig.c#L362)
 
-## Change the Programming Mode of a C-Series Module
+### Change the Programming Mode of a C-Series Module
 
 **Command:** `setmode [TARGET_NAME] [scan|fpga|daq]`
 
@@ -242,9 +258,9 @@ Setting Module Mode: Mod3 (NI 9205)
 
 **Implemented:** [nirtconfig_setModuleMode](https://github.com/jacobson3/NISystemConfigurationCLI/blob/main/src/nirtconfig.c#L513)
 
-## Change the Alias of a Module
+### Change the Alias of a Module
 
-**Command:** `setalias <TARGETNAME> <SLOT> <NEW_ALIAS>`
+**Command:** `setalias [TARGETNAME] [SLOT] [NEW_ALIAS]`
 
 **Description:** Changes the alias of the resouce in slot number **SLOT** to **NEW_ALIAS**.
 
@@ -256,3 +272,7 @@ Setting Module Mode: Mod3 (NI 9205)
 + [NISysCfgRenameResource](https://zone.ni.com/reference/en-XX/help/373242N-01/nisyscfgcvi/nisyscfgrenameresource/)
 
 **Implemented:** [nirtconfig_setAlias](https://github.com/jacobson3/NISystemConfigurationCLI/blob/main/src/nirtconfig.c#L671)
+
+## License
+
+[BSD 3-Clause License](https://github.com/jacobson3/NISystemConfigurationCLI/blob/main/LICENSE)
